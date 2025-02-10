@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Q&A</title>
+  <link rel="stylesheet" href="/css/qna/inquiryInsertForm.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+<th:block th:replace="layout/header :: headerLayout"></th:block>
+<div class="ft">
+  <div class="qna-main-container">
+    <div class="qna--main-title">
+      <h1>Q&A</h1>
+    <div class="qna-split--div-post"></div>
+    </div>
+    <div>
+      <!-- 타임리프 폼 사용 -->
+      <form th:action="@{/qna/inquiryInsert}" method="POST" id="Post">
+        <input type="hidden" id="uid" name="uid" th:value="${session.authInfo.id}">
+        <div class="form-group">
+          <label for="title">제목</label>
+          <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
+        </div>
+
+      <div class="form-group">
+        <label for="content">내용</label>
+        <textarea id="content" name="content" placeholder="내용을 입력하세요" rows="10" required></textarea>
+      </div>
+      <div class="qna--form-actions">
+        <button type="submit" class="qna--submit-button">작성 완료</button>
+        <button type="button" class="qna--cancel-button" onclick="window.location.href='/qna/inquiry';">취소</button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+</body>
+<div class="footers"></div> <!-- 이거 지우면 안됨 -->
+<th:block th:replace="layout/footer :: footerLayout"></th:block>
+</html>

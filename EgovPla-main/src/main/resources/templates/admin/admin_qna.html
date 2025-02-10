@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 페이지</title>
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+  <link rel="stylesheet" href="/css/admin/admin-qna.css">
+</head>
+<body>
+<th:block th:replace="admin/adminHeader :: headerLayout"></th:block>
+
+<!-- 본문 내용 시작 -->
+<div class="ft">
+  <div class="admin5-list-container">
+    <div class="admin5-main-tihome">
+      <div class="admin5-main-title">
+        <h1 class="admin5-list-title">Q&A 목록</h1>
+        <div class="admin5-split-div-post"></div>
+      </div>
+    </div>
+
+    <div id="qnaForm">
+      <label for="select_answer" class="mb-3">답변 상태 : </label>
+      <select id="select_answer">
+        <option value="0">전부</option>
+        <option value="1">대기중</option>
+        <option value="2">답변 완료</option>
+        <option value="3">문의 종료</option>
+      </select>
+      <div class="answer-status-container">
+        <h1 class="admin5-count" id="count">총 0건</h1>
+      </div>
+	</div>
+    <!-- Q&A 목록 테이블 -->
+    <table class="admin5-post-table" style="margin-top: 20px;">
+      <thead>
+      <tr class="admin5-post-tbody-tr">
+        <th>번호</th>
+        <th>제목</th>
+        <th>작성일</th>
+        <th>작성자</th>
+        <th>상태</th>
+      </tr>
+      </thead>
+      <tbody id="qnaTableBody">
+      <!-- JavaScript에서 동적으로 추가됨 -->
+      </tbody>
+    </table>
+
+    <!-- 페이지 네비게이션 -->
+    <nav>
+      <ul class="pagination" id="pagination">
+        <!-- JavaScript에서 동적으로 추가됨 -->
+      </ul>
+    </nav>
+
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var now = new Date(/*[[${now}]]*/);
+  var qnaList = /*[[${qna}]]*/ [];
+  var members = /*[[${member}]]*/ [];
+  /*]]>*/
+</script>
+
+<script>
+  var rowsPerPage = 10;
+  var currentPage = 1;
+  var filteredQnaList = [...qnaList];  // 초기 로드시 전체 데이터를 복사
+
+  function getMemberName(uid) {
+    let member = members.find(m => m.id === uid);
+    return member ? member.name : "알 수 없음";
+  }
+
+  function formatDate(dateString) {
+    if (!dateString) return "";
+
+    let date = new Date(dateString.replace(" ", "T"));
+    let nowDate = new Date(now);
+
+    let todayStr = nowDate.getFullYear() + '-' +
+            String(nowDate.getMonth() + 1).padStart(2, '0') + '-' +
+            String(nowDate.getDate()).padStart(2, '0');
+
+    let dateStr = date.getFullYear() + '-' +
+            String(date.getMonth() + 1).padStart(2, '0') + '-' +
+            String(date.getDate()).padStart(2, '0');
+
+    if (todayStr === dateStr) {
+      return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+    } else {
+      return dateStr;
+    }
+  }
+
+  function renderTable(page) {
+    const tableBody = document.getElementById('qnaTableBody');
+    tableBody.innerHTML = '';
+
+    let startIndex = (page - 1) * rowsPerPage;
+    let endIndex = startIndex + rowsPerPage;
+    let pageData = filteredQnaList.slice(startIndex, endIndex);
+
+    if (pageData.length === 0 && page > 1) {
+      currentPage -= 1;
+      renderTable(currentPage);
+      return;
+    }
+
+    pageData.forEach((item, index) => {
+      let row = document.createElement('tr');
+      row.classList.add('tr-click');
+      row.id = item.id;
+      row.innerHTML = `
+        <td>${filteredQnaList.length - startIndex - index}</td>
+        <td>${item.title}</td>
+        <td>${formatDate(item.created_at)}</td>
+        <td>${getMemberName(item.uid)}</td>
+        <td>${getStatusText(item)}</td>
+      `;
+
+      row.addEventListener('click', function () {
+        window.location.href = '/admin/qna/detail?id=' + item.id;
+      });
+
+      tableBody.appendChild(row);
+    });
+
+    renderPagination();
+  }
+
+  function renderPagination() {
+    const paginationContainer = document.getElementById('pagination');
+    paginationContainer.innerHTML = '';
+
+    let totalPages = Math.ceil(filteredQnaList.length / rowsPerPage);
+
+    // 게시글이 없는 경우 페이징 숨기기
+    if (filteredQnaList.length === 0) {
+      paginationContainer.style.display = 'none';
+      return;
+    } else {
+      paginationContainer.style.display = 'flex';
+    }
+
+    if (totalPages === 0) totalPages = 1;
+
+    paginationContainer.innerHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changePage(1)">&laquo;</a></li>`;
+
+    paginationContainer.innerHTML += `<li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changePage(${currentPage - 1})">&lt;</a></li>`;
+
+    for (let i = 1; i <= totalPages; i++) {
+      paginationContainer.innerHTML += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="changePage(${i})">${i}</a></li>`;
+    }
+
+    paginationContainer.innerHTML += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changePage(${currentPage + 1})">&gt;</a></li>`;
+
+    paginationContainer.innerHTML += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="changePage(${totalPages})">&raquo;</a></li>`;
+  }
+
+  function changePage(page) {
+    if (page < 1 || page > Math.ceil(filteredQnaList.length / rowsPerPage)) return;
+    currentPage = page;
+    renderTable(page);
+  }
+
+  function updateCount() {
+    let completed = qnaList.filter(item => item.endYn === 'Y').length;
+    let pending = qnaList.filter(item => item.state === 'Q').length;
+    let answered = qnaList.filter(item => item.state === 'A').length;
+
+    document.getElementById('count').textContent =
+            `총 ${qnaList.length}건 (문의 종료: ${completed} / 대기중: ${pending} / 답변 완료: ${answered - completed})`;
+  }
+
+  function getStatusText(item) {
+    return item.endYn === 'Y' ? '문의 종료' : (item.state === 'Q' ? '대기중' : '답변 완료');
+  }
+
+  document.getElementById('select_answer').addEventListener('change', function() {
+    let selectedValue = this.value;
+
+    filteredQnaList = qnaList.filter(item => {
+      return selectedValue === "0" || getStatusText(item) === getStatusTextValue(selectedValue);
+    });
+
+    currentPage = 1;
+    renderTable(currentPage);
+  });
+
+  function getStatusTextValue(value) {
+    switch(value) {
+      case "1": return "대기중";
+      case "2": return "답변 완료";
+      case "3": return "문의 종료";
+      default: return "";
+    }
+  }
+
+  window.onload = function() {
+    updateCount();  // 전체 데이터 기준으로 count 업데이트
+    renderTable(currentPage);
+  };
+</script>
+
+
+<div class="footers"></div>
+<th:block th:replace="layout/footer :: footerLayout"></th:block>
+</body>
+</html>

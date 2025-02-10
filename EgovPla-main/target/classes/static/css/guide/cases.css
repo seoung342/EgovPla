@@ -1,0 +1,142 @@
+@charset "UTF-8";
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap');
+
+/* 기본 스타일 */
+html, body {
+    height: 100%; /* 문서와 뷰포트의 높이를 100%로 설정 */
+    margin: 0; /* 기본 여백 제거 */
+    padding: 0; /* 기본 패딩 제거 */
+    font-family: 'Noto Sans KR', sans-serif; /* Noto Sans KR 폰트 적용 */
+    background-color: white; /* 배경색 설정 */
+}
+
+/* 제목 스타일 */
+.cases-title {
+    width: 100%; /* 부모 요소 너비에 맞춤 */
+    max-width: 1000px; /* 최대 너비 설정 */
+    margin: 0 auto 15px; /* 중앙 정렬 및 하단 여백 */
+    text-align: center; /* 텍스트를 가운데 정렬 */
+}
+
+/* 구분선 스타일 */
+.cases-split-div-post {
+    width: 100%;
+    max-width: 1000px;
+    height: 1px;
+    background-color: lightgray;
+    margin: 0 auto 5px;
+}
+
+/* 메인 헤더 스타일 */
+.main-tihome {
+    display: flex; /* Flexbox 사용 */
+    align-items: center; /* 수직 가운데 정렬 */
+    justify-content: center; /* 가로 중앙 정렬 */
+    width: 100%; /* 전체 너비 설정 */
+    margin: 0 auto 15px; /* 상단과 하단 여백 설정 */
+}
+
+/* 메인 타이틀 스타일 */
+.main-title {
+    font-size: 24px; /* 제목 폰트 크기 */
+    font-weight: lighter; /* 가벼운 폰트 두께 */
+    margin-top: 50px;
+    text-align: center; /* 텍스트를 가운데 정렬 */
+    display: block; /* 블록 요소로 설정 */
+}
+
+.cases-link {
+    color: gray; /* 링크 기본 색상 */
+    font-size: 16px; /* 텍스트 크기 */
+    font-weight: lighter; /* 가벼운 폰트 두께 */
+    text-decoration: none; /* 밑줄 제거 */
+    margin: 0 10px 30px; /* 좌우 여백 10px, 하단 여백 15px */
+}
+
+.cases-link:hover {
+    text-decoration: none; /* 호버 시 밑줄 제거 */
+    color: black; /* 호버 시 색상 */
+}
+
+.cases-link.active {
+    color: black; /* 활성화된 링크 색상 */
+    font-weight: bold; /* 강조된 폰트 */
+    text-decoration: none; /* 밑줄 제거 */
+}
+
+.section h2 {
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+.hero-section h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* Hero Section */
+.hero-section {
+    background: #f7f9fc;
+    padding: 40px 20px;
+    margin-top: 40px;
+    text-align: center;
+}
+.hero-section p {
+    font-size: 1.2rem;
+    color: #34495e;
+}
+
+/* Section 스타일 */
+.section {
+    padding: 50px 20px;
+    text-align: center;
+}
+.section p {
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+    color: #555;
+}
+
+/* 카드 스타일 (서비스 및 리소스) */
+.services, .resources {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* 부모 컨테이너 크기 조정 */
+.service-item, .resource-item {
+    text-align: center; /* 텍스트 중앙 정렬 유지 */
+    display: flex;
+    flex-direction: column; /* 세로 정렬 */
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* 부모 컨테이너 너비 확장 */
+    max-width: 1200px; /* 최대 너비 설정 */
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+/* 이미지 크기 조정 */
+.service-item img, .resource-item img {
+    width: 100%; /* 부모 컨테이너에 맞춤 */
+    max-width: 1000px; /* 최대 너비 조정 */
+    height: auto; /* 비율 유지 */
+    display: block;
+    margin: 0 auto; /* 중앙 정렬 */
+}
+
+.service-item h3, .resource-item h3 {
+    font-size: 1.5rem; /* 제목 크기 */
+    margin-top: 20px; /* 이미지와 제목 사이 간격 */
+    margin-bottom: 10px; /* 제목과 본문 사이 간격 */
+    color: #333;
+}
+.service-item p, .resource-item p {
+    font-size: 1.1rem; /* 본문 텍스트 크기 */
+    color: #555;
+}
+
+/* 호버 효과 제거 */
+.service-item:hover, .resource-item:hover {
+    transform: none; /* 이동 효과 제거 */
+}

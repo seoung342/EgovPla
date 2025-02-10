@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>분석결과 조회</title>
+    <link rel="stylesheet" href="/css/map/deteil-apply.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+</head>
+
+<body>
+<!-- 헤더 레이아웃을 호출하는 Thymeleaf 템플릿 -->
+<th:block th:replace="layout/header :: headerLayout"></th:block>
+
+<!-- 본문 내용 시작 -->
+<div class="ft">
+    <div class="deteil-apply-list-container">
+        <div class="deteil-apply-main-tihome">
+            <div class="deteil-apply-main-title">
+                <h1 class="deteil-apply-apply-title">상세 입지 분석</h1> <!-- QNA 섹션 제목 -->
+                <div class="deteil-apply-split-div-post"></div> <!-- 시각적 구분선 -->
+                <a href="/analysis/normalList" class="normalList-link">기본 입지 분석</a> <!-- FAQ로 이동 -->
+                <a href="/analysis/detailList" class="normalList-link active">상세 입지 분석</a> <!-- QNA 페이지로 이동 -->
+            </div>
+        </div>
+        <div id="applyForm">
+            <label for="select_answer" class="mb-3">답변 상태 : </label>
+            <select id="select_answer">
+                <option value="0">전부</option>
+                <option value="1">분석 신청</option>
+                <option value="2">분석 종료</option>
+            </select>
+            <div class="answer-status-container">
+                <h1 class="admin5-count" id="count">총 0건</h1>
+            </div>
+        </div>
+
+        <!-- 공지사항 목록을 표시하는 테이블 -->
+        <table class="deteil-apply-post-table" style="margin-top: 20px;">
+            <thead>
+            <tr class="deteil-apply-post-tbody-tr">
+                <!-- 테이블 헤더: 번호, 제목, 작성일, 조회수 -->
+                <th>번호</th>
+                <th>제목</th>
+                <th>작성일</th>
+                <th>상태</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- 데이터는 JavaScript로 처리 -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 페이징 -->
+    <div>
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <!-- 페이지 네비게이션은 JavaScript에서 업데이트됩니다 -->
+            </ul>
+        </nav>
+    </div>
+</div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var applyList = /*[[${applies}]]*/ []; // 서버에서 받아온 데이터를 여기서 처리
+    var originalList = [...applyList]; // 필터링 전 전체 데이터를 저장
+    /*]]>*/
+</script>
+
+<script>
+    // 페이지 당 항목 수
+    const itemsPerPage = 10;
+    let currentPage = 0; // 현재 페이지
+
+    // 페이지 수 계산
+    function getTotalPages() {
+        return Math.ceil(applyList.length / itemsPerPage);
+    }
+
+    // 데이터 표시 함수
+    function displayData() {
+        applyList.sort(function(a, b) {
+            return b.id - a.id;  // id가 큰 값이 먼저 오도록 정렬
+        });
+        const tbody = document.querySelector('.deteil-apply-post-table tbody');
+        tbody.innerHTML = ''; // 기존 내용 비우기
+
+        // 시작 인덱스와 끝 인덱스 계산
+        const startIndex = currentPage * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, applyList.length);
+
+        // 해당 페이지의 데이터만 필터링
+        const pageData = applyList.slice(startIndex, endIndex);
+
+        pageData.forEach(function(item, index) {
+            const row = document.createElement('tr');
+            row.classList.add('tr-click');
+            row.setAttribute('id', item.id);
+
+            row.innerHTML = `
+                <td>${item.id}</td>
+                <td><a href="/analysis/detailDetail?id=${item.id}">${item.title}</a></td>
+                <td>${formatDate(item.createdAt)}</td>
+                <td>${item.completedYn === 'Y' ? '분석 종료' : '분석 신청'}</td>
+            `;
+
+            // 테이블에 행 추가
+            tbody.appendChild(row);
+        });
+
+        // 페이지 네비게이션 업데이트
+        if (applyList && applyList.length > 0){
+            updatePagination();
+        }
+
+        // 행 클릭 이벤트 추가
+        addClickEvent(); // 행이 추가된 후 클릭 이벤트를 추가
+    }
+
+    // 날짜 포맷 함수
+    function formatDate(dateString) {
+        const date = new Date(dateString);  // item.createdAt을 Date 객체로 변환
+        const today = new Date();  // 오늘 날짜를 가져옴
+
+        // 오늘 날짜와 비교
+        const isToday = date.toLocaleDateString('ko-KR') === today.toLocaleDateString('ko-KR');
+
+        // 오늘 날짜와 같으면 'HH:mm' 포맷, 다르면 'yyyy-MM-dd' 포맷
+        if (isToday) {
+            // 'HH:mm' 형식으로 시간만 표시 (오전/오후 없음)
+            return date.toLocaleTimeString('ko-KR', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        } else {
+            // 'yyyy-MM-dd' 형식으로 날짜만 표시
+            return date.toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        }
+    }
+
+
+
+    // 페이지 네비게이션 업데이트 함수
+    function updatePagination() {
+        const totalPages = getTotalPages(); // 전체 페이지 수를 계산
+        const pagination = document.querySelector('.pagination');
+        pagination.innerHTML = ''; // 기존 페이지 번호 제거
+
+        // 처음으로 버튼
+        const firstButton = document.createElement('li');
+        firstButton.classList.add('page-item');
+        firstButton.classList.toggle('disabled', currentPage === 0); // 첫 페이지에서는 비활성화
+        firstButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(0)">&laquo;</a>`;
+        pagination.appendChild(firstButton);
+
+        // 이전 버튼
+        const prevButton = document.createElement('li');
+        prevButton.classList.add('page-item');
+        prevButton.classList.toggle('disabled', currentPage === 0); // 첫 페이지에서는 비활성화
+        prevButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">&lt;</a>`;
+        pagination.appendChild(prevButton);
+
+        // 페이지 번호들
+        for (let i = 0; i < totalPages; i++) {
+            const pageButton = document.createElement('li');
+            pageButton.classList.add('page-item');
+            pageButton.classList.toggle('active', i === currentPage); // 현재 페이지는 활성화 상태
+            pageButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i + 1}</a>`;
+            pagination.appendChild(pageButton);
+        }
+
+        // 다음 버튼
+        const nextButton = document.createElement('li');
+        nextButton.classList.add('page-item');
+        nextButton.classList.toggle('disabled', currentPage === totalPages - 1); // 마지막 페이지에서는 비활성화
+        nextButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">&gt;</a>`;
+        pagination.appendChild(nextButton);
+
+        // 마지막으로 버튼
+        const lastButton = document.createElement('li');
+        lastButton.classList.add('page-item');
+        lastButton.classList.toggle('disabled', currentPage === totalPages - 1); // 마지막 페이지에서는 비활성화
+        lastButton.innerHTML = `<a class="page-link" href="#" onclick="changePage(${totalPages - 1})">&raquo;</a>`;
+        pagination.appendChild(lastButton);
+    }
+
+
+    // 페이지 변경 함수
+    function changePage(page) {
+        currentPage = page;
+        displayData();
+        updateCounts();  // 카운트 업데이트
+
+    }
+
+    // 필터링 기능 (답변 상태별)
+    document.getElementById('select_answer').addEventListener('change', function() {
+        var selectedValue = this.value;
+        // 필터링 전 전체 데이터를 이용하여 상태에 맞는 데이터만 필터링
+        if (selectedValue === "0") {
+            applyList = [...originalList]; // 전부를 다시 표시
+        } else {
+            applyList = originalList.filter(function(item) {
+                return getStatusText(selectedValue) === (item.completedYn === 'Y' ? '분석 종료' : '분석 신청');
+            });
+        }
+        currentPage = 0;  // 필터링 후 첫 페이지로 이동
+        displayData();
+        updateCounts();  // 카운트 업데이트
+
+    });
+
+    // 선택된 답변 상태에 해당하는 텍스트 반환
+    function getStatusText(value) {
+        switch(value) {
+            case "1": return "분석 신청";
+            case "2": return "분석 종료";
+            default: return "";
+        }
+    }
+
+    // 초기 데이터 표시
+    displayData();
+
+    // 클릭 시 상세 페이지로 이동
+    function addClickEvent() {
+        document.querySelectorAll('.tr-click').forEach(function(tr) {
+            tr.addEventListener('click', function () {
+                let index = tr.id.trim();  // 각 항목의 id 값 가져오기
+                window.location.href = '/analysis/detailDetail?id=' + index;  // 상세 페이지로 이동
+            });
+        });
+    }
+
+    // 카운트 업데이트 함수
+
+    // 카운트 업데이트 함수
+    function updateCounts() {
+        if (originalList.length === 0) {
+            document.getElementById('count').textContent = "총 0건";
+        } else {
+            let completed = 0;
+            let pending = 0;
+
+            // 전체 데이터(originalList)를 기준으로 카운트
+            originalList.forEach(function(item) {
+                if (item.completedYn === 'Y') {
+                    completed++;
+                }
+                if (item.completedYn === 'N') {
+                    pending++;
+                }
+            });
+
+            document.getElementById('count').textContent = `총 ${originalList.length}건 (분석 종료: ${completed} / 분석 신청: ${pending})`;
+        }
+    }
+
+    // 페이지 로드 시 카운트 업데이트 및 데이터 표시
+    window.onload = function() {
+        displayData();
+        updateCounts();  // 카운트 업데이트 함수 호출
+    };
+
+</script>
+<!-- 푸터 레이아웃을 호출하는 Thymeleaf 템플릿 -->
+<div class="footers"></div> <!-- 이 부분은 지우지 말아야 합니다. -->
+<th:block th:replace="layout/footer :: footerLayout"></th:block>
+</body>
+</html>

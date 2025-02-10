@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>공지사항 작성</title>
+  <link rel="stylesheet" href="/css/admin/admin-notice-write.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
+</head>
+<body>
+<th:block th:replace="admin/adminHeader :: headerLayout"></th:block>
+<div class="ft">
+  <div class="admin1-main-container">
+    <div class="admin1-main-title">
+      <h1>공지사항 작성</h1>
+      <div class="admin1-split-div-post"></div>
+    </div>
+    <div>
+      <form th:action="@{/admin/notice/create}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+          <label for="title">제목:</label>
+          <input type="text" id="title" name="title" required>
+        </div>
+        <div class="form-group">
+          <label for="content">내용:</label>
+          <textarea id="content" name="content" required></textarea><br><br>
+        </div>
+        <div class="form-group">
+          <label for="file">파일 업로드:</label>
+          <input type="file" id="file" name="files" multiple><br><br>
+        </div>
+        <div class="admin-form-actions">
+          <button type="submit"  class="admin-submit-button" >작성완료</button>
+          <button type="button"  class="admin-cancel-button"  onclick="window.location.href='/admin/notice';">취소</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+<div class="footers"></div> <!-- 이거 지우면 안됨 -->
+<th:block th:replace="layout/footer :: footerLayout"></th:block>
+</html>
